@@ -9,9 +9,11 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import st_remux as st
 
 from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
+
 
 
 get_ipython().run_line_magic('matplotlib', 'inline')
@@ -20,24 +22,54 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 # In[2]:
 
 
-high_dir = 'datasets/high/'
-low_dir = 'datasets/low/'
+# Config
+highpath = 'high.csv'
+lowpath = 'none.csv'
+
+fs = 4000
+win_len = 40
+
+use_filter = 0   # weird results if we use python filtering
+
+use_matlab_backend = 0
 
 
+# In[3]:
 
-def generate_3darray(directory):
-    files = os.listdir(directory)
-    dims = np.genfromtxt(directory + files[0], delimiter=',').shape
-    length = len(files)
-    arr = np.zeros((length, dims[0], dims[1]))
+
+high = np.genfromtxt(highpath, delimiter=',')
+low = np.genfromtxt(lowpath, delimiter=',')
+
+
+# In[4]:
+
+
+if use_matlab_backend:
+    print('Using MATLAB signal processing backend')
+    # high_dir = 'datasets/high/'
+    # low_dir = 'datasets/low/'
+
+    high_dir = 'C:/Users/Geoffrey/Documents/MATLAB/S transform time frequency/high/'
+    low_dir = 'C:/Users/Geoffrey/Documents/MATLAB/S transform time frequency/low/'
+
+    def generate_3darray(directory):
+        files = os.listdir(directory)
+        dims = np.genfromtxt(directory + files[0], delimiter=',').shape
+        length = len(files)
+        arr = np.zeros((length, dims[0], dims[1]))
+
+        for idx, val in enumerate(files):
+            arr[idx] = np.genfromtxt(directory + val, delimiter=',')
+
+        return arr
+
+    hi = generate_3darray(high_dir)
+    lo = generate_3darray(low_dir)
     
-    for idx, val in enumerate(files):
-        arr[idx] = np.genfromtxt(directory + val, delimiter=',')
-        
-    return arr
-
-hi = generate_3darray(high_dir)
-lo = generate_3darray(low_dir)
+else: 
+    print('Using native backend')
+    hi = st.raw_to_arr(high, fs, win_len, 0)
+    lo = st.raw_to_arr(low, fs, win_len, 0)
 
 X = np.concatenate((hi, lo))
 
@@ -47,20 +79,20 @@ lo_Y = np.zeros(len(lo), dtype=int)
 Y = np.concatenate((hi_Y, lo_Y))
 
 
-# In[3]:
+# In[5]:
 
 
 train_X, test_X, train_Y, test_Y = train_test_split(X, Y, test_size=0.1)
 
 
-# In[4]:
+# In[6]:
 
 
 print('Training data shape: ', train_X.shape, train_Y.shape)
 print('Testing data shape: ', test_X.shape, test_Y.shape)
 
 
-# In[5]:
+# In[7]:
 
 
 classes = np.unique(train_Y)
@@ -69,23 +101,23 @@ print('Total number of outputs: ', nClasses)
 print('Output classes: ', classes)
 
 
-# In[6]:
+# In[8]:
 
 
 plt.figure(figsize=[10,2])
 
 # Display first image in training set
 plt.subplot(121)
-plt.pcolormesh(train_X[0,:,:], cmap='gray')
+plt.pcolormesh(train_X[0,:,:], cmap='jet')
 plt.title("Ground Truth: {}".format(train_Y[0]))
 
-# Display first image in testing set
+# Display second image in testing set
 plt.subplot(122)
-plt.pcolormesh(test_X[0], cmap='gray')
-plt.title("Ground Truth: {}".format(test_Y[0]))
+plt.pcolormesh(test_X[1], cmap='jet')
+plt.title("Ground Truth: {}".format(test_Y[1]))
 
 
-# In[7]:
+# In[9]:
 
 
 ydim = train_X[0].shape[0]
@@ -95,14 +127,14 @@ test_X = test_X.reshape(-1, ydim, xdim, 1)
 train_X.shape, test_X.shape
 
 
-# In[8]:
+# In[10]:
 
 
 train_X = train_X.astype('float32')
 test_X = test_X.astype('float32')
 
 
-# In[9]:
+# In[11]:
 
 
 # Change labels from categorical to one-hot encoding
@@ -114,13 +146,13 @@ print('Original label: ', train_Y[0])
 print('After conversion to one-hot: ', train_Y_one_hot[0])
 
 
-# In[10]:
+# In[12]:
 
 
 train_Y_one_hot.shape
 
 
-# In[11]:
+# In[13]:
 
 
 # Partition data for 80% training and 20% validation
@@ -131,7 +163,7 @@ train_X, valid_X, train_label, valid_label = train_test_split(train_X, train_Y_o
 train_X.shape, valid_X.shape, train_label.shape, valid_label.shape
 
 
-# In[12]:
+# In[14]:
 
 
 # let's get down to business
@@ -143,7 +175,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
 
 
-# In[13]:
+# In[15]:
 
 
 # Parameters
@@ -152,7 +184,7 @@ epochs = 50
 num_classes = nClasses
 
 
-# In[14]:
+# In[16]:
 
 
 emg_model = Sequential()
@@ -191,7 +223,7 @@ emg_model.add(Dropout(0.3))
 emg_model.add(Dense(num_classes, activation='softmax'))
 
 
-# In[15]:
+# In[17]:
 
 
 emg_model.compile(
@@ -200,13 +232,13 @@ emg_model.compile(
     metrics=['accuracy'])
 
 
-# In[16]:
+# In[18]:
 
 
 emg_model.summary()
 
 
-# In[17]:
+# In[19]:
 
 
 emg_train = emg_model.fit(
@@ -218,20 +250,20 @@ emg_train = emg_model.fit(
     validation_data=(valid_X, valid_label))
 
 
-# In[18]:
+# In[20]:
 
 
 test_eval = emg_model.evaluate(test_X, test_Y_one_hot, verbose=0)
 
 
-# In[19]:
+# In[21]:
 
 
 print('Test loss: ', test_eval[0])
 print('Test accuracy: ', test_eval[1])
 
 
-# In[20]:
+# In[22]:
 
 
 # Visualization
@@ -252,7 +284,7 @@ plt.legend()
 plt.show()
 
 
-# In[21]:
+# In[23]:
 
 
 emg_train_dropout = emg_model.fit(
@@ -264,26 +296,26 @@ emg_train_dropout = emg_model.fit(
     validation_data=(valid_X, valid_label))
 
 
-# In[22]:
+# In[24]:
 
 
-emg_model.save("emg_model_dropout.h5py")
+# emg_model.save("emg_model_dropout_new.h5py")
 
 
-# In[23]:
+# In[25]:
 
 
 test_eval= emg_model.evaluate(test_X, test_Y_one_hot, verbose=1)
 
 
-# In[24]:
+# In[26]:
 
 
 print('Test loss: ', test_eval[0])
 print('Test accuracy: ', test_eval[1])
 
 
-# In[25]:
+# In[27]:
 
 
 # Visualization
@@ -304,25 +336,25 @@ plt.legend()
 plt.show()
 
 
-# In[26]:
+# In[28]:
 
 
 predicted_classes = emg_model.predict(test_X)
 
 
-# In[27]:
+# In[29]:
 
 
 predicted_classes = np.argmax(np.round(predicted_classes), axis=1)
 
 
-# In[28]:
+# In[30]:
 
 
 predicted_classes.shape, test_Y.shape
 
 
-# In[29]:
+# In[31]:
 
 
 correct = np.where(predicted_classes==test_Y)[0]
@@ -334,7 +366,7 @@ for i, correct, in enumerate(correct[:9]):
     plt.tight_layout()
 
 
-# In[30]:
+# In[32]:
 
 
 incorrect = np.where(predicted_classes!=test_Y)[0]
@@ -346,7 +378,7 @@ for i, incorrect, in enumerate(incorrect[:9]):
     plt.tight_layout()
 
 
-# In[31]:
+# In[33]:
 
 
 from sklearn.metrics import classification_report
