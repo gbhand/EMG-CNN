@@ -23,8 +23,16 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # Config
-highpath = 'high.csv'
-lowpath = 'none.csv'
+# highpath = 'datasets/high.csv'
+# lowpath = 'datasets/none.csv'
+# hi = st.raw_to_arr(high, fs, win_len, 0)
+# lo = st.raw_to_arr(low, fs, win_len, 0)
+highdir = 'datasets/high'
+meddir = 'datasets/med'
+lowdir = 'datasets/low'
+nonedir = 'datasets/none'
+
+
 
 fs = 4000
 win_len = 40
@@ -37,8 +45,8 @@ use_matlab_backend = 0
 # In[3]:
 
 
-high = np.genfromtxt(highpath, delimiter=',')
-low = np.genfromtxt(lowpath, delimiter=',')
+# high = np.genfromtxt(highpath, delimiter=',')
+# low = np.genfromtxt(lowpath, delimiter=',')
 
 
 # In[4]:
@@ -68,8 +76,8 @@ if use_matlab_backend:
     
 else: 
     print('Using native backend')
-    hi = st.raw_to_arr(high, fs, win_len, 0)
-    lo = st.raw_to_arr(low, fs, win_len, 0)
+    hi = st.raw_to_arr(highdir, fs, win_len, 0)
+    lo = st.raw_to_arr(nonedir, fs, win_len, 0)
 
 X = np.concatenate((hi, lo))
 
@@ -302,20 +310,20 @@ emg_train_dropout = emg_model.fit(
 # emg_model.save("emg_model_dropout_new.h5py")
 
 
-# In[25]:
+# In[23]:
 
 
 test_eval= emg_model.evaluate(test_X, test_Y_one_hot, verbose=1)
 
 
-# In[26]:
+# In[24]:
 
 
 print('Test loss: ', test_eval[0])
 print('Test accuracy: ', test_eval[1])
 
 
-# In[27]:
+# In[25]:
 
 
 # Visualization
@@ -336,25 +344,25 @@ plt.legend()
 plt.show()
 
 
-# In[28]:
+# In[26]:
 
 
 predicted_classes = emg_model.predict(test_X)
 
 
-# In[29]:
+# In[27]:
 
 
 predicted_classes = np.argmax(np.round(predicted_classes), axis=1)
 
 
-# In[30]:
+# In[28]:
 
 
 predicted_classes.shape, test_Y.shape
 
 
-# In[31]:
+# In[29]:
 
 
 correct = np.where(predicted_classes==test_Y)[0]
@@ -366,7 +374,7 @@ for i, correct, in enumerate(correct[:9]):
     plt.tight_layout()
 
 
-# In[32]:
+# In[30]:
 
 
 incorrect = np.where(predicted_classes!=test_Y)[0]
@@ -378,7 +386,7 @@ for i, incorrect, in enumerate(incorrect[:9]):
     plt.tight_layout()
 
 
-# In[33]:
+# In[31]:
 
 
 from sklearn.metrics import classification_report
