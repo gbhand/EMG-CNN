@@ -1,9 +1,15 @@
 # EMG-CNN
+#### Depreciated
 1. Make sure to download Stockwell Transform for MATLAB (st.m)
 2. Import your time-series EMG signal to the MATLAB environment with each fatigue level its own vector/matrix (NOT table)
 3. Run dsp.m, it will output folders of each fatigue level containing individual windows
 4. Ensure 'high_dir' and 'low_dir' in model.py point to these folders
 5. Run model.py to split data, train the model, and evaluate the model
+
+### Setup
+1. Clone repository
+2. Place raw EMG signal .csv files in according subdirectories in /datasets/
+3. Run model.py to split data, train the model, and evaluate the model
 
 
 ### Notes
