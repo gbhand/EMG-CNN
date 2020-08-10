@@ -135,7 +135,7 @@ def raw_to_arr(directory, fs, win_len, USE_FILTER): # changed timeseries input t
 
 	return arr_total
 
-"""def raw_to_arr(directory, fs, win_len, USE_FILTER):
+def raw_to_arr2(directory, fs, win_len, USE_FILTER):
     
     ydim = 0
     xdim = 0
@@ -155,7 +155,7 @@ def raw_to_arr(directory, fs, win_len, USE_FILTER): # changed timeseries input t
             xdim = arr.shape[2]
             print('ydim=' + str(ydim) + ' xdim=' + str(xdim))
             
-    return arr"""
+    return arr
 
 if __name__ == '__main__':
 	# high = np.genfromtxt('high.csv', delimiter=',')
