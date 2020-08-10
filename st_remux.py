@@ -123,7 +123,7 @@ def raw_to_arr(directory, fs, win_len, USE_FILTER): # changed timeseries input t
 			print('ydim=' + ydim + ' xdim=' + xdim)
 		else:
 			break
-	arr_total = np.zeros((1, 16, 40))
+	arr_total = np.zeros((1, 16, 3))
 
 	for filename in os.listdir(directory):
 		if filename.endswith('.csv'):
@@ -134,6 +134,28 @@ def raw_to_arr(directory, fs, win_len, USE_FILTER): # changed timeseries input t
 
 
 	return arr_total
+
+"""def raw_to_arr(directory, fs, win_len, USE_FILTER):
+    
+    ydim = 0
+    xdim = 0
+    initialpath="/Users/aarushisehgal/Applications/Overall_work/Internship_works/UCSD_project/CNN_codes/"
+    final_path= initialpath + str(directory)
+    
+    os.chdir(final_path)
+    files= os.listdir(final_path)
+    print(files)
+    
+    for f in files:
+        if f.endswith('.csv'):
+            timeseries = np.genfromtxt(f, delimiter=',')
+            filt = filter_data(timeseries, fs, win_len, USE_FILTER)
+            arr = to_array(filt, win_len)
+            ydim = arr.shape[1]
+            xdim = arr.shape[2]
+            print('ydim=' + str(ydim) + ' xdim=' + str(xdim))
+            
+    return arr"""
 
 if __name__ == '__main__':
 	# high = np.genfromtxt('high.csv', delimiter=',')
